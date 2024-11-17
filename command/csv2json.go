@@ -1,4 +1,4 @@
-package convert
+package command
 
 import (
 	"encoding/json"
@@ -15,10 +15,11 @@ var (
 )
 
 // NewCSV2JSONCommand
-//  @param use
-//  @param short
-//  @param long
-//  @return *cobra.Command
+//
+//	@param use
+//	@param short
+//	@param long
+//	@return *cobra.Command
 func NewCSV2JSONCommand(use, short, long string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   use,
