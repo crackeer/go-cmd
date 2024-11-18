@@ -18,6 +18,7 @@ func main() {
 	rootCmd.AddCommand(command.NewHttpPost("http-post", "HttpPost请求", ""))
 	rootCmd.AddCommand(command.NewQrcode("qrcode", "生成二维码", ""))
 	rootCmd.AddCommand(command.NewRegexExtract("regex-extract", "正则提取", ""))
-
+	rootCmd.AddCommand(command.NewHttpServer("http-server", "简单的httpServer", ""))
+	rootCmd.AddCommand(command.NewIP("ip", "获取内网ip", ""))
 	rootCmd.Execute()
 }
