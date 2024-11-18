@@ -25,7 +25,7 @@ func NewHttpPost(use, short, long string) *cobra.Command {
 		Args:  cobra.MinimumNArgs(2),
 		Run:   doHttpPost,
 	}
-	cmd.SetHelpTemplate(`./gf-run` + use + ` url /file/to/body.json /file/to/header.json
+	cmd.SetHelpTemplate(`./got` + use + ` url /file/to/body.json /file/to/header.json
 `)
 	return cmd
 }

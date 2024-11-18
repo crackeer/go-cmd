@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	archiver "github.com/mholt/archiver/v4"
+	"github.com/mholt/archiver/v4"
 )
 
 func GetNowTimeStamp() string {
@@ -191,7 +191,7 @@ func Zip(srcDir, dest string) error {
 
 	// we can use the CompressedArchive type to gzip a tarball
 	// (compression is not required; you could use Tar directly)
-	format := archiver.CompressedArchive{
+	format := archiver.Archive{
 		Compression: nil,
 		Archival:    archiver.Zip{},
 	}
@@ -217,7 +217,7 @@ func Unzip(srcFile, destSrc string) error {
 	defer file.Close()
 
 	format := &archiver.Zip{}
-	return format.Extract(context.Background(), file, nil, func(ctx context.Context, f archiver.File) error {
+	return format.Extract(context.Background(), file, func(ctx context.Context, f archiver.FileInfo) error {
 		if f.IsDir() {
 			return os.MkdirAll(filepath.Join(destSrc, f.NameInArchive), os.ModePerm)
 		}
