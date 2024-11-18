@@ -1,5 +1,5 @@
 #!/bin/sh
 
-go build -o=/usr/local/bin/xtool main.go
+go build -o=/usr/local/bin/got main.go
 
-echo "Installed at /usr/local/bin/xtool"
+echo "Installed at /usr/local/bin/got"

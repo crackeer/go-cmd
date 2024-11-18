@@ -17,6 +17,7 @@ func main() {
 	rootCmd.AddCommand(command.NewGolangBase64Encode("base64-encode", "base64编码", ""))
 	rootCmd.AddCommand(command.NewHttpPost("http-post", "HttpPost请求", ""))
 	rootCmd.AddCommand(command.NewQrcode("qrcode", "生成二维码", ""))
+	rootCmd.AddCommand(command.NewRegexExtract("regex-extract", "正则提取", ""))
 
 	rootCmd.Execute()
 }
