@@ -3,7 +3,11 @@ package util
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
+	"net/http"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -254,4 +258,58 @@ func GetInnerIP() []string {
 		}
 	}
 	return ipList
+}
+
+// DownloadTo
+//
+//	@param urlString
+//	@param target
+//	@return error
+func DownloadTo(urlString string, target string) error {
+	dir, _ := filepath.Split(target)
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		return err
+	}
+	response, err := http.Get(urlString)
+	if err != nil {
+		return err
+	}
+	bytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(target, bytes, os.ModePerm)
+}
+
+// ExtractSomeString
+//
+//	@param value
+//	@param matchFunc
+//	@return []string
+func Extract(value interface{}, matchFunc func(string) bool) []string {
+	if strValue, ok := value.(string); ok {
+		if data, err := JsonDecodeX(strValue); err == nil {
+			return Extract(data, matchFunc)
+		}
+		if matchFunc(strValue) {
+			return []string{strValue}
+		}
+		return []string{}
+	}
+
+	var retData []string
+	if mapValue, ok := value.(map[string]interface{}); ok {
+		for _, value := range mapValue {
+			retData = append(retData, Extract(value, matchFunc)...)
+		}
+		return retData
+	}
+
+	if listValue, ok := value.([]interface{}); ok {
+		for _, value := range listValue {
+			retData = append(retData, Extract(value, matchFunc)...)
+		}
+		return retData
+	}
+	return nil
 }
