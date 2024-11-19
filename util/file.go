@@ -56,15 +56,17 @@ func MakeTmpWorkDir(tag string) string {
 //	@param folder
 //	@return []string
 func GetFiles(folder string) []string {
-	files, _ := os.ReadDir(folder)
 	retData := []string{}
-	for _, file := range files {
-		if file.IsDir() {
-			tmp := GetFiles(filepath.Join(folder, file.Name()))
-			retData = append(retData, tmp...)
-		} else {
-			retData = append(retData, filepath.Join(folder, file.Name()))
+	err := filepath.WalkDir(folder, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
 		}
+		retData = append(retData, filepath.Join(folder, path))
+
+		return nil
+	})
+	if err != nil {
+		return retData
 	}
 	return retData
 }
@@ -74,16 +76,16 @@ func GetFiles(folder string) []string {
 //	@param fileDir
 //	@return map
 func GetFilesMap(folder string) map[string]string {
-	fileList := GetFiles(folder)
-	if len(fileList) < 1 {
+	retData := map[string]string{}
+	filepath.WalkDir(folder, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		retData[path] = filepath.Join(folder, path)
+
 		return nil
-	}
-	fileMap := map[string]string{}
-	for _, file := range fileList {
-		key := file[len(folder)+1:]
-		fileMap[key] = file
-	}
-	return fileMap
+	})
+	return retData
 }
 
 // GetDeviceSN
@@ -131,25 +133,12 @@ func GetPxeServiceVersion() (*PxeServiceVersion, error) {
 	return retData, err
 }
 
-func GetDirFilesAsMap(fileDir string) map[string]string {
-	fileList := GetFiles(fileDir)
-	if len(fileList) < 1 {
-		return nil
-	}
-	fileMap := map[string]string{}
-	for _, file := range fileList {
-		key := file[len(fileDir)+1:]
-		fileMap[key] = file
-	}
-	return fileMap
-}
-
 // Zip
 //
 //	@param srcDir
 //	@param dest
 //	@return error
-func Zip(srcDir, dest string) error {
+func Zip(srcDir, dest string, print bool) error {
 	file, err := os.Open(srcDir)
 	if err != nil {
 		return err
@@ -163,21 +152,21 @@ func Zip(srcDir, dest string) error {
 
 	fileMap := map[string]string{}
 	if fileStat.IsDir() {
-		fileMap = GetDirFilesAsMap(srcDir)
+		fileMap = GetFilesMap(srcDir)
 	} else {
 		// srcDir是一个文件
 		_, name := filepath.Split(srcDir)
 		fileMap[name] = srcDir
 	}
 
-	fileMapRevert := map[string]string{}
-
-	for key, value := range fileMap {
-		fileMapRevert[value] = key
+	if print {
+		for key := range fileMap {
+			fmt.Println("Adding::", key)
+		}
 	}
 
 	// map files on disk to their paths in the archive
-	files, err := archiver.FilesFromDisk(nil, fileMapRevert)
+	files, err := archiver.FilesFromDisk(nil, fileMap)
 	if err != nil {
 		return err
 	}
@@ -209,7 +198,7 @@ func Zip(srcDir, dest string) error {
 //	@param srcFile
 //	@param destSrc
 //	@return error
-func Unzip(srcFile, destSrc string) error {
+func Unzip(srcFile, destSrc string, print bool) error {
 	file, err := os.Open(srcFile)
 	if err != nil {
 		return err
@@ -236,6 +225,9 @@ func Unzip(srcFile, destSrc string) error {
 			if err := os.MkdirAll(tmpDir, os.ModePerm); err != nil {
 				return err
 			}
+		}
+		if print {
+			fmt.Println("Extracting:", filepath.Join(destSrc, f.NameInArchive))
 		}
 		return os.WriteFile(filepath.Join(destSrc, f.NameInArchive), bytes, os.ModePerm)
 	})

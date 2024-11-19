@@ -20,5 +20,7 @@ func main() {
 	rootCmd.AddCommand(command.NewRegexExtract("regex-extract", "正则提取", ""))
 	rootCmd.AddCommand(command.NewHttpServer("http-server", "简单的httpServer", ""))
 	rootCmd.AddCommand(command.NewIP("ip", "获取内网ip", ""))
+	rootCmd.AddCommand(command.NewUnzip("unzip", "解压zip文件", ""))
+	rootCmd.AddCommand(command.NewZip("zip", "压缩文件", ""))
 	rootCmd.Execute()
 }
