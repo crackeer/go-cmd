@@ -22,5 +22,9 @@ func main() {
 	rootCmd.AddCommand(command.NewIP("ip", "获取内网ip", ""))
 	rootCmd.AddCommand(command.NewUnzip("unzip", "解压zip文件", ""))
 	rootCmd.AddCommand(command.NewZip("zip", "压缩文件", ""))
+
+	// MySQL Query to dump JSON
+	// MySQL Insert From JSON Data
+	// Batch Download File from file
 	rootCmd.Execute()
 }
