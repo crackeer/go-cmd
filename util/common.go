@@ -242,7 +242,7 @@ func GetInnerIP() []string {
 				ip = v.IP
 			}
 
-			if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsGlobalUnicast() == false {
+			if ip.IsLoopback() || ip.IsLinkLocalUnicast() || !ip.IsGlobalUnicast() {
 				// 忽略回环地址、链路本地地址和非全局单播地址
 				continue
 			}
