@@ -23,6 +23,7 @@ func main() {
 	rootCmd.AddCommand(command.NewUnzip("unzip", "解压zip文件", ""))
 	rootCmd.AddCommand(command.NewZip("zip", "压缩文件", ""))
 	rootCmd.AddCommand(command.NewDownload("download", "批量下载文件", ""))
+	rootCmd.AddCommand(command.NewJsonExtractCmd("json-extract", "json提取", ""))
 
 	// MySQL Query to dump JSON
 	// MySQL Insert From JSON Data
