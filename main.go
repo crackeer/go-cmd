@@ -23,8 +23,8 @@ func main() {
 	rootCmd.AddCommand(command.NewUnzip("unzip", "解压zip文件", ""))
 	rootCmd.AddCommand(command.NewZip("zip", "压缩文件", ""))
 	rootCmd.AddCommand(command.NewDownload("download", "批量下载文件", ""))
-
-	// MySQL Query to dump JSON
-	// MySQL Insert From JSON Data
+	rootCmd.AddCommand(command.NewMySQLQueryCommand("mysql-query", "MySQL查询", ""))
+	rootCmd.AddCommand(command.NewMySQLInsertCommand("mysql-insert", "MySQL插入", ""))
+	rootCmd.AddCommand(command.NewSSHExecute("ssh-exec", "远程执行", ""))
 	rootCmd.Execute()
 }
