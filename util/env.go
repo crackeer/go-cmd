@@ -14,7 +14,7 @@ func GetHost() string {
 }
 
 func GetMySQLHost() string {
-	if value := GetEnv("GF_MYSQL_HOST"); len(value) > 0 {
+	if value := GetEnv("MYSQL_HOST"); len(value) > 0 {
 		return value
 	}
 	if value := GetHost(); len(value) > 0 {
@@ -24,21 +24,21 @@ func GetMySQLHost() string {
 }
 
 func GetMySQLPort() string {
-	if value := GetEnv("GF_MYSQL_PORT"); len(value) > 0 {
+	if value := GetEnv("MYSQL_PORT"); len(value) > 0 {
 		return value
 	}
 	return "3306"
 }
 
 func GetMySQLPassword() string {
-	if value := GetEnv("GF_MYSQL_PASSWORD"); len(value) > 0 {
+	if value := GetEnv("MYSQL_PASSWORD"); len(value) > 0 {
 		return value
 	}
 	return "z_php_root"
 }
 
 func GetMySQLUser() string {
-	if value := GetEnv("GF_MYSQL_USER"); len(value) > 0 {
+	if value := GetEnv("MYSQL_USER"); len(value) > 0 {
 		return value
 	}
 	return "root"
@@ -52,14 +52,14 @@ func GetApolloUser() string {
 }
 
 func GetApolloPassword() string {
-	if value := GetEnv("GF_APOLLO_PASSWORD"); len(value) > 0 {
+	if value := GetEnv("APOLLO_PASSWORD"); len(value) > 0 {
 		return value
 	}
 	return "admin"
 }
 
 func GetApolloHost() string {
-	if value := GetEnv("GF_APOLLO_HOST"); len(value) > 0 {
+	if value := GetEnv("APOLLO_HOST"); len(value) > 0 {
 		return value
 	}
 
