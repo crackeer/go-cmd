@@ -104,4 +104,5 @@ func doSSHExecute(cmd *cobra.Command, args []string) {
 		}
 		session.Close()
 	}
+	fmt.Println("all commands done!!!")
 }
