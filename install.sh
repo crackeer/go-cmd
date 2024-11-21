@@ -1,5 +1,8 @@
 #!/bin/sh
 
-go build -o=/usr/local/bin/got main.go
+output="${GOPATH}/bin/got"
 
-echo "Installed at /usr/local/bin/got"
+
+go build -o="${output}" main.go
+
+echo "Installed at ${output}"

@@ -22,7 +22,7 @@ func NewSSHExecute(use, short, long string) *cobra.Command {
 		Short: short,
 		Long:  long,
 		Run:   doSSHExecute,
-		Args:  cobra.MinimumNArgs(1),
+		Args:  cobra.MinimumNArgs(0),
 	}
 	cmd.SetUsageTemplate(`got ssh-execute host_aliais command
 `)
@@ -33,7 +33,7 @@ func NewSSHExecute(use, short, long string) *cobra.Command {
 func doSSHExecute(cmd *cobra.Command, args []string) {
 	viper.AutomaticEnv()
 	sshConfigFile := "/usr/local/etc/got/ssh-config.json"
-	if value := viper.Get("SSH_EXECUTE_CONFIG"); value != nil {
+	if value := viper.Get("SSH_EXEC_CONFIG"); value != nil {
 		sshConfigFile = value.(string)
 	}
 	sshConfig := SSHExecuteConfig{}
@@ -41,12 +41,29 @@ func doSSHExecute(cmd *cobra.Command, args []string) {
 		fmt.Println("read ssh config file error: ", err)
 		return
 	}
+	// 1. list hosts
+	if len(args) < 1 {
+		fmt.Println("available hosts:")
+		for name, host := range sshConfig.Servers {
+			fmt.Println("host:", name, " -> ", host)
+			fmt.Println("")
+		}
+		return
+	}
 
+	// 2. verify host config
 	hostConfig, ok := sshConfig.Servers[args[0]]
 	if !ok {
 		fmt.Println("host not found")
 		return
 	}
+	parts := strings.Split(hostConfig, ":")
+	if len(parts) < 4 {
+		fmt.Println("host config error")
+		return
+	}
+
+	// 3. list commands
 	if len(args) < 2 {
 		fmt.Println("available commands:")
 		for name, cmds := range sshConfig.Commands {
@@ -56,25 +73,8 @@ func doSSHExecute(cmd *cobra.Command, args []string) {
 		}
 		return
 	}
-	commands, ok := sshConfig.Commands[args[1]]
-	if !ok {
 
-		fmt.Println("commands not found")
-		fmt.Println("")
-
-		fmt.Println("available commands:")
-		for name, cmds := range sshConfig.Commands {
-			fmt.Println("command_alias:", name)
-			fmt.Println("commands:", strings.Join(cmds, " -> "))
-			fmt.Println("")
-		}
-		return
-	}
-	parts := strings.Split(hostConfig, ":")
-	if len(parts) < 4 {
-		fmt.Println("host config error")
-		return
-	}
+	// 4. connect remote server
 	user := parts[0]
 	password := parts[1]
 	host := parts[2]
@@ -86,23 +86,45 @@ func doSSHExecute(cmd *cobra.Command, args []string) {
 	}
 	sshClient, err := ssh.Dial("tcp", host+":"+port, config)
 	if err != nil {
-		panic("dial error:" + err.Error())
+		fmt.Println("dial error: ", err)
+		return
 	}
 
-	for _, command := range commands {
-		fmt.Println("execute command: ", command)
-		session, err := sshClient.NewSession()
-		if err != nil {
-			panic("new session error:" + err.Error())
+	// 5. execute commands
+
+	for _, cmdAlias := range args[1:] {
+		if _, ok := sshConfig.Commands[cmdAlias]; !ok {
+			fmt.Println("command not found")
+			return
 		}
-		//session.RequestPty("bash", 80, 40, ssh.TerminalModes{})
-		session.Stdout = os.Stdout
-		session.Stderr = os.Stderr
-		if err := session.Run(command); err != nil {
+
+		fmt.Println("----- execute command alias: ", cmdAlias, " -----")
+
+		commands := sshConfig.Commands[cmdAlias]
+
+		for _, command := range commands {
+			fmt.Println("command: ", command)
+			session, err := sshClient.NewSession()
+			if err != nil {
+				fmt.Println("new session error: ", err)
+				return
+			}
+			//session.RequestPty("bash", 80, 40, ssh.TerminalModes{})
+			session.Stdout = os.Stdout
+			session.Stderr = os.Stderr
+			if err := session.Run(command); err != nil {
+				session.Close()
+				fmt.Println("run command error: ", err)
+				return
+			}
 			session.Close()
-			panic("run command error:" + err.Error())
 		}
-		session.Close()
+
+		fmt.Println("----- end command alias: ", cmdAlias, " -----")
+		fmt.Println("")
+
 	}
+
 	fmt.Println("all commands done!!!")
+
 }
