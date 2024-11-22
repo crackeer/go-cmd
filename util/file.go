@@ -292,3 +292,16 @@ func ReadFileAs(path string, v interface{}) error {
 	}
 	return json.Unmarshal(bytes, v)
 }
+
+// FileExists
+//
+//	@param filename
+//	@return bool
+func FileExists(filename string) bool {
+	if value, err := os.Stat(filename); err == nil && !value.IsDir() {
+		return true
+	} else if os.IsNotExist(err) {
+		return false
+	}
+	return false
+}

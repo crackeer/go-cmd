@@ -153,31 +153,6 @@ func GetInt64ValFromMap(container map[string]interface{}, key string) int64 {
 	return 0
 }
 
-// DecodeResourceCode
-//
-//	@param resourceCode
-//	@return int64
-//	@return int64
-//	@return int64
-//	@return error
-func DecodeResourceCode(resourceCode string) (int64, int64, int64, error) {
-	hd := hashids.NewData()
-	hd.Salt = "#resource-parameter-hashids-salt@localized#"
-	hd.MinLength = 18
-
-	h, _ := hashids.NewWithData(hd)
-	result, err := h.DecodeInt64WithError(resourceCode)
-	if err != nil {
-		return 0, 0, 0, err
-	}
-
-	if len(result) < 3 {
-		return 0, 0, 0, fmt.Errorf("invalid resource code")
-	}
-
-	return result[0], result[1], result[2], nil
-}
-
 // EncodeResourceCode
 //
 //	@param customID
