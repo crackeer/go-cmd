@@ -297,7 +297,6 @@ func ReadFileAs(path string, v interface{}) error {
 	return json.Unmarshal(bytes, v)
 }
 
-const AesIV string = "1234567890123456"
 
 // DecryptFile 使用AES算法解密文件
 //
@@ -410,4 +409,17 @@ func AesEncryptFile(inputFile, outputFile string, key []byte, inputIv string) er
 	}
 
 	return nil
+}
+
+// FileExists
+//
+//	@param filename
+//	@return bool
+func FileExists(filename string) bool {
+	if value, err := os.Stat(filename); err == nil && !value.IsDir() {
+		return true
+	} else if os.IsNotExist(err) {
+		return false
+	}
+	return false
 }
