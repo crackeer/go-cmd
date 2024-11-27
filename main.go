@@ -27,5 +27,7 @@ func main() {
 	rootCmd.AddCommand(command.NewMySQLQueryCommand("mysql-query", "MySQL查询", ""))
 	rootCmd.AddCommand(command.NewMySQLInsertCommand("mysql-insert", "MySQL插入", ""))
 	rootCmd.AddCommand(command.NewSSHExecute("ssh-exec", "远程执行", ""))
+	rootCmd.AddCommand(command.NewEncryptFile("encrypt-file", "文件内容加密", ""))
+	rootCmd.AddCommand(command.NewDecryptFile("decrypt-file", "文件内容解密", ""))
 	rootCmd.Execute()
 }

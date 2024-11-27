@@ -1,7 +1,11 @@
 package util
 
 import (
+	"bytes"
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -291,4 +295,119 @@ func ReadFileAs(path string, v interface{}) error {
 		return err
 	}
 	return json.Unmarshal(bytes, v)
+}
+
+const AesIV string = "1234567890123456"
+
+// DecryptFile 使用AES算法解密文件
+//
+//	@param inputFile
+//	@param outputFile
+//	@param key
+//	@return error
+func AesDecryptFile(inputFile, outputFile string, key []byte, inputIv string) error {
+	// 打开加密文件
+	in, err := os.Open(inputFile)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	// 读取加密文件内容
+	ciphertext, err := io.ReadAll(in)
+	if err != nil {
+		return err
+	}
+
+	// 初始化解密模式
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return err
+	}
+
+	// 为了解密，我们需要使用相同的初始化向量IV
+	// 在这个例子中，我们假设IV是硬编码的或者以某种方式传递给了解密函数
+	iv := make([]byte, aes.BlockSize)
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return err
+	}
+
+	// 使用CBC模式进行解密
+	mode := cipher.NewCBCDecrypter(block, []byte(inputIv))
+
+	// 初始化解密后的内容切片
+	plaintext := make([]byte, len(ciphertext))
+
+	// 去除填充
+	mode.CryptBlocks(plaintext, ciphertext)
+
+	// AES加密是块加密，所以我们需要去除填充
+	padding := int(plaintext[len(plaintext)-1])
+	plaintext = plaintext[:len(plaintext)-padding]
+
+	// 写入解密后的内容到新文件
+	out, err := os.Create(outputFile)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = out.Write(plaintext)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// AesEncryptFile
+//
+//	@param inputFile
+//	@param outputFile
+//	@param key
+//	@return error
+func AesEncryptFile(inputFile, outputFile string, key []byte, inputIv string) error {
+	// 打开源文件
+	in, err := os.Open(inputFile)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	// 读取源文件内容
+	input, err := io.ReadAll(in)
+	if err != nil {
+		return err
+	}
+
+	// 填充数据，使其长度为16的倍数
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return err
+	}
+	blockSize := block.BlockSize()
+	padding := blockSize - len(input)%blockSize
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+	input = append(input, padtext...)
+
+	// 初始化加密模式
+	mode := cipher.NewCBCEncrypter(block, []byte(inputIv))
+
+	// 加密
+	ciphertext := make([]byte, len(input))
+	mode.CryptBlocks(ciphertext, input)
+
+	// 写入加密内容到新文件
+	out, err := os.Create(outputFile)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = out.Write(ciphertext)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
